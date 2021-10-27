@@ -113,8 +113,10 @@ class BaseController extends ThinkController
                 # 菜单数据处理
                 if($menu){
                     foreach ($menu as $k=>$v){
+                        $name = $v['name'] ?? '';
+                        $title = $v['title'] ?? '';
                         $menu[$k]['pathUrl'] = $v['url'].'?pid='.$pid;
-                        $menu[$k]['title'] = empty($menu[$k]['title']) ? $v['name'] : $v['title'];
+                        $menu[$k]['title'] = empty($title) ? $name : $title;
                     }
                 }
 

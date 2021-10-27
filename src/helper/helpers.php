@@ -74,11 +74,21 @@ function parse_addons_config($config)
     if($menus){
         $menusTmp = [];
         foreach($menus as $item){
-            $menusTmp[] = [
-                'name' => $item['@attributes']['name'] ?? '',
-                'icon' => $item['@attributes']['icon'] ?? '',
-                'url' => $item['@attributes']['url'] ?? ''
-            ];
+            if(count($item)>1){
+                foreach($item as $itemSon){
+                    $menusTmp[] = [
+                        'name' => $itemSon['@attributes']['name'] ?? '',
+                        'icon' => $itemSon['@attributes']['icon'] ?? '',
+                        'url' => $itemSon['@attributes']['url'] ?? ''
+                    ];
+                }
+            }else{
+                $menusTmp[] = [
+                    'name' => $item['@attributes']['name'] ?? '',
+                    'icon' => $item['@attributes']['icon'] ?? '',
+                    'url' => $item['@attributes']['url'] ?? ''
+                ];
+            }
         }
         $menus = $menusTmp;
     }
@@ -123,14 +133,12 @@ if (!function_exists('app_http_request')) {
      * @param array $extra 其他参数，用于扩展curl
      * @return array|bool|string
      */
-    function app_http_request($url, $data = null, $header = [], $extra = [])
+    function app_http_request($url, $data = null, $header = [], $extra = [], $isJson = false)
     {
-        if ((!$data || empty($data)) && !$header) {
-            $header = [
-                'Content-Type' => 'application/json; charset=utf-8',
-            ];
+        if($isJson){
+            $header['Content-Type'] = 'application/json; charset=utf-8';
+            $data = json_encode($data);
         }
-        if (empty($header['Content-Type'])) $header['Content-Type'] = 'application/json; charset=utf-8';
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -215,7 +223,7 @@ function getip()
 function createQrcode($url)
 {
     if ($url) {
-        require IA_ROOT . '/qrcode/phpqrcode.php';
+        require root_path() . 'extend/qrcode/phpqrcode.php';
         $errorCorrectionLevel = 'L';
         $matrixPointSize = '6';
         QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize);
@@ -370,6 +378,7 @@ function media($fileUrl, $storage = null, $domain = false)
         return ROOT_PATH . $fileUrl;
     }
 
+    return $fileUrl;
 }
 
 /**
@@ -596,4 +605,26 @@ function sql_parse($content = '', $string = false, $replace = [])
     } else {
         return $string == true ? '' : [];
     }
+}
+
+/**
+ * http/https请求
+ * @param url $url 请求的链接，若为get则将参数拼接而成
+ * @param data $data 请求的参数
+ * @return data
+ */
+function appa_http_request($url,$data=null)
+{
+    $curl = curl_init();
+    curl_setopt($curl,CURLOPT_URL,$url);
+    curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,FALSE);
+    curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,FALSE);
+    if(!empty($data)){
+        curl_setopt($curl,CURLOPT_POST,1);
+        curl_setopt($curl,CURLOPT_POSTFIELDS,$data);
+    }
+    curl_setopt($curl,CURLOPT_RETURNTRANSFER,1);
+    $output = curl_exec($curl);
+    curl_close($curl);
+    return $output;
 }

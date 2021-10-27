@@ -16,7 +16,6 @@ use vitphp\admin\model\SystemMenu;
 
 class AnnotationAuth
 {
-
     /**
      * 获取注解中指定的键值
      * @param $flag
@@ -81,7 +80,7 @@ class AnnotationAuth
                 if ($delTitle) {
                     continue;
                 }
-                $call = array(
+                $call = [
                     'class' => $class,
                     'name' => $method->getName(),
                     'meta' => [
@@ -90,7 +89,7 @@ class AnnotationAuth
                         'login' => 1
                     ],
                     'flag' => $method_flag
-                );
+                ];
                 $data[] = $call;
                 continue;
             }
@@ -110,12 +109,12 @@ class AnnotationAuth
             }
 
             if ($delTitle && empty($metadata['title'])) continue;
-            $call = array(
+            $call = [
                 'class' => $class,
                 'name' => $method->getName(),
                 'meta' => $metadata,
                 'flag' => $method_flag
-            );
+            ];
             $data[] = $call;
         }
         foreach ($data as $i => $v) {
@@ -152,20 +151,16 @@ class AnnotationAuth
         $data = [];
 
         foreach (self::scandir(root_path() . $controllerPath, false)['files'] as $file) {
-
             $className = basename($file, '.php');
 
             $classString = str_replace('/', '\\', $controllerPath . DIRECTORY_SEPARATOR . $className);
             $classString = str_replace('\\\\', '\\', $classString);
-
             if (class_exists($classString)) {
-
                 $data[] = self::getControllerAuth($classString, $delTitle);
             }
         }
 
         foreach (self::scandir(root_path() . $controllerPath, false)['dirs'] as $dir) {
-
             $mDir = self::getPathAuth($controllerPath . $dir, $delTitle);
             $data[] = array_merge(...$mDir);
         }

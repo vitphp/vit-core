@@ -138,7 +138,7 @@ abstract class BaseController
             'sign' => $sign,
             'time' => $time
         ];
-        $result = app_http_request($url, json_encode($post));
+        $result = app_http_request($url, $post);
         $result = is_null(json_decode($result)) ? [] : json_decode($result, true);
         if(!$result || $result['code']!=1){
             return '';
